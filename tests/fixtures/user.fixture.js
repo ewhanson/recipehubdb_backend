@@ -13,6 +13,7 @@ const userOne = {
 	email: faker.internet.email().toLowerCase(),
 	password,
 	role: 'user',
+	verified: true,
 };
 
 const userTwo = {
@@ -21,6 +22,7 @@ const userTwo = {
 	email: faker.internet.email().toLowerCase(),
 	password,
 	role: 'user',
+	verified: true,
 };
 
 const admin = {
@@ -29,6 +31,7 @@ const admin = {
 	email: faker.internet.email().toLowerCase(),
 	password,
 	role: 'admin',
+	verified: true,
 };
 
 const insertUsers = async (users) => {

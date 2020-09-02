@@ -35,6 +35,10 @@ const userSchema = mongoose.Schema(
 			},
 			private: true, // used by the toJSON plugin
 		},
+		verified: {
+			type: Boolean,
+			default: false,
+		},
 		role: {
 			type: String,
 			enum: roles,
@@ -69,6 +73,15 @@ userSchema.statics.isEmailTaken = async function (email, excludeUserId) {
 userSchema.methods.isPasswordMatch = async function (password) {
 	const user = this;
 	return bcrypt.compare(password, user.password);
+};
+
+/**
+ * Check if user has been verified
+ * @returns {Promise<boolean>}
+ */
+userSchema.methods.isVerified = async function () {
+	const user = this;
+	return user.verified;
 };
 
 userSchema.pre('save', async function (next) {

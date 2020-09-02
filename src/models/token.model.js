@@ -15,7 +15,7 @@ const tokenSchema = mongoose.Schema(
 		},
 		type: {
 			type: String,
-			enum: ['refresh', 'resetPassword'],
+			enum: ['refresh', 'resetPassword', 'accountVerification'],
 			required: true,
 		},
 		expires: {

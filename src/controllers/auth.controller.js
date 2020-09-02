@@ -4,8 +4,14 @@ const { authService, userService, tokenService, emailService } = require('../ser
 
 const register = catchAsync(async (req, res) => {
 	const user = await userService.createUser(req.body);
-	const tokens = await tokenService.generateAuthTokens(user);
-	res.status(httpStatus.CREATED).send({ user, tokens });
+	const verificationToken = await tokenService.generateVerificationToken(user);
+	await emailService.sendAccountVerificationEmail(user.email, verificationToken);
+	res.status(httpStatus.CREATED).send({ user });
+});
+
+const verifyAccount = catchAsync(async (req, res) => {
+	await authService.verifyAccount(req.query.token);
+	res.status(httpStatus.NO_CONTENT).send();
 });
 
 const login = catchAsync(async (req, res) => {
@@ -38,6 +44,7 @@ const resetPassword = catchAsync(async (req, res) => {
 
 module.exports = {
 	register,
+	verifyAccount,
 	login,
 	logout,
 	refreshTokens,

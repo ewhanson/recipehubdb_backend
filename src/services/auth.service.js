@@ -14,6 +14,8 @@ const loginUserWithEmailAndPassword = async (email, password) => {
 	const user = await userService.getUserByEmail(email);
 	if (!user || !(await user.isPasswordMatch(password))) {
 		throw new ApiError(httpStatus.UNAUTHORIZED, 'Incorrect email or password');
+	} else if (!(await user.isVerified())) {
+		throw new ApiError(httpStatus.UNAUTHORIZED, 'Unverified user');
 	}
 	return user;
 };
@@ -70,9 +72,29 @@ const resetPassword = async (resetPasswordToken, newPassword) => {
 	}
 };
 
+/**
+ * Verify user account
+ * @param {string }verificationToken
+ * @returns {Promise}
+ */
+const verifyAccount = async (verificationToken) => {
+	try {
+		const verificationTokenDoc = await tokenService.verifyToken(verificationToken, 'accountVerification');
+		const user = await userService.getUserById(verificationTokenDoc.user);
+		if (!user) {
+			throw new Error();
+		}
+		await Token.deleteMany({ user: user.id, type: 'accountVerification' });
+		await userService.updateUserById(user.id, { verified: true });
+	} catch (error) {
+		throw new ApiError(httpStatus.UNAUTHORIZED, 'User account verification failed');
+	}
+};
+
 module.exports = {
 	loginUserWithEmailAndPassword,
 	logout,
 	refreshAuth,
 	resetPassword,
+	verifyAccount,
 };

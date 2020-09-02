@@ -9,6 +9,12 @@ const register = {
 	}),
 };
 
+const verifyAccount = {
+	query: Joi.object().keys({
+		token: Joi.string().required(),
+	}),
+};
+
 const login = {
 	body: Joi.object().keys({
 		email: Joi.string().required(),
@@ -45,6 +51,7 @@ const resetPassword = {
 
 module.exports = {
 	register,
+	verifyAccount,
 	login,
 	logout,
 	refreshTokens,

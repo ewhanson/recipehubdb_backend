@@ -23,6 +23,16 @@ const sendEmail = async (to, subject, text) => {
 	await transport.sendMail(msg);
 };
 
+const sendAccountVerificationEmail = async (to, token) => {
+	const subject = 'User account verification';
+	// TODO: replace this url with the link to the user account verification page of your front-end app
+	const verificationUrl = `http://link-to-app/reset-password?token=${token}`;
+	const text = `Dear user,
+	To verify your account, click on this link: ${verificationUrl}
+	If you did not create an account, then ignore this email.`;
+	await sendEmail(to, subject, text);
+};
+
 /**
  * Send reset password email
  * @param {string} to
@@ -31,7 +41,7 @@ const sendEmail = async (to, subject, text) => {
  */
 const sendResetPasswordEmail = async (to, token) => {
 	const subject = 'Reset password';
-	// replace this url with the link to the reset password page of your front-end app
+	// TODO: replace this url with the link to the reset password page of your front-end app
 	const resetPasswordUrl = `http://link-to-app/reset-password?token=${token}`;
 	const text = `Dear user,
   To reset your password, click on this link: ${resetPasswordUrl}
@@ -43,4 +53,5 @@ module.exports = {
 	transport,
 	sendEmail,
 	sendResetPasswordEmail,
+	sendAccountVerificationEmail,
 };

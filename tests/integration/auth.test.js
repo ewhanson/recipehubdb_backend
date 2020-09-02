@@ -26,23 +26,36 @@ describe('Auth routes', () => {
 				email: faker.internet.email().toLowerCase(),
 				password: 'password1',
 			};
+			jest.spyOn(emailService.transport, 'sendMail').mockResolvedValue();
 		});
 
 		test('should return 201 and successfully register user if request data is ok', async () => {
 			const res = await request(app).post('/v1/auth/register').send(newUser).expect(httpStatus.CREATED);
 
 			expect(res.body.user).not.toHaveProperty('password');
-			expect(res.body.user).toEqual({ id: expect.anything(), name: newUser.name, email: newUser.email, role: 'user' });
+			expect(res.body.user).toEqual({
+				id: expect.anything(),
+				name: newUser.name,
+				email: newUser.email,
+				role: 'user',
+				verified: false,
+			});
 
 			const dbUser = await User.findById(res.body.user.id);
 			expect(dbUser).toBeDefined();
 			expect(dbUser.password).not.toBe(newUser.password);
 			expect(dbUser).toMatchObject({ name: newUser.name, email: newUser.email, role: 'user' });
+		});
 
-			expect(res.body.tokens).toEqual({
-				access: { token: expect.anything(), expires: expect.anything() },
-				refresh: { token: expect.anything(), expires: expect.anything() },
-			});
+		test('should return 201 and email user verification token', async () => {
+			const sendAccountVerificationEmailSpy = jest.spyOn(emailService, 'sendAccountVerificationEmail');
+
+			await request(app).post('/v1/auth/register').send(newUser).expect(httpStatus.CREATED);
+
+			expect(sendAccountVerificationEmailSpy).toHaveBeenCalledWith(newUser.email, expect.any(String));
+			const verificationToken = sendAccountVerificationEmailSpy.mock.calls[0][1];
+			const dbVerificationTokenDoc = await Token.findOne({ token: verificationToken, user: newUser._id });
+			expect(dbVerificationTokenDoc).toBeDefined();
 		});
 
 		test('should return 400 error if email is invalid', async () => {
@@ -75,6 +88,55 @@ describe('Auth routes', () => {
 		});
 	});
 
+	describe('POST /v1/auth/verify-account', () => {
+		test('should return 204 and verify user', async () => {
+			await insertUsers([userOne]);
+			const expires = moment().add(config.jwt.verificationExpirationDays, 'days');
+			const verificationToken = tokenService.generateToken(userOne._id, expires);
+			await tokenService.saveToken(verificationToken, userOne._id, expires, 'accountVerification');
+
+			await request(app).post('/v1/auth/verify-account').query({ token: verificationToken }).expect(httpStatus.NO_CONTENT);
+
+			const dbUser = await User.findById(userOne._id);
+			expect(await dbUser.isVerified()).toBe(true);
+
+			const dbVerificationTokenCount = await Token.countDocuments({ user: userOne._id, type: 'accountVerification' });
+			expect(dbVerificationTokenCount).toBe(0);
+		});
+
+		test('should return 400 if verification token is missing', async () => {
+			await insertUsers([userOne]);
+
+			await request(app).post('/v1/auth/verify-account').expect(httpStatus.BAD_REQUEST);
+		});
+
+		test('should return 401 if verification token is blacklisted', async () => {
+			await insertUsers([userOne]);
+			const expires = moment().add(config.jwt.verificationExpirationDays, 'days');
+			const verificationToken = tokenService.generateToken(userOne._id, expires);
+			await tokenService.saveToken(verificationToken, userOne._id, expires, 'accountVerification', true);
+
+			await request(app).post('/v1/auth/verify-account').query({ token: verificationToken }).expect(httpStatus.UNAUTHORIZED);
+		});
+
+		test('should return 401 if verification token is expired', async () => {
+			await insertUsers([userOne]);
+			const expires = moment().subtract(1, 'days');
+			const verificationToken = tokenService.generateToken(userOne._id, expires);
+			await tokenService.saveToken(verificationToken, userOne._id, expires, 'accountVerification');
+
+			await request(app).post('/v1/auth/verify-account').query({ token: verificationToken }).expect(httpStatus.UNAUTHORIZED);
+		});
+
+		test('should return 401 if user is not found', async () => {
+			const expires = moment().add(config.jwt.verificationExpirationDays, 'days');
+			const verificationToken = tokenService.generateToken(userOne._id, expires);
+			await tokenService.saveToken(verificationToken, userOne._id, expires, 'accountVerification');
+
+			await request(app).post('/v1/auth/verify-account').query({ token: verificationToken }).expect(httpStatus.UNAUTHORIZED);
+		});
+	});
+
 	describe('POST /v1/auth/login', () => {
 		test('should return 200 and login user if email and password match', async () => {
 			await insertUsers([userOne]);
@@ -90,6 +152,7 @@ describe('Auth routes', () => {
 				name: userOne.name,
 				email: userOne.email,
 				role: userOne.role,
+				verified: true,
 			});
 
 			expect(res.body.tokens).toEqual({
@@ -119,6 +182,22 @@ describe('Auth routes', () => {
 			const res = await request(app).post('/v1/auth/login').send(loginCredentials).expect(httpStatus.UNAUTHORIZED);
 
 			expect(res.body).toEqual({ code: httpStatus.UNAUTHORIZED, message: 'Incorrect email or password' });
+		});
+
+		test('should return 401 error if user is not verified', async () => {
+			const unverifiedUser = {
+				...userOne,
+				verified: false,
+			};
+			await insertUsers([unverifiedUser]);
+			const loginCredentials = {
+				email: userOne.email,
+				password: userOne.password,
+			};
+
+			const res = await request(app).post('/v1/auth/login').send(loginCredentials).expect(httpStatus.UNAUTHORIZED);
+
+			expect(res.body).toEqual({ code: httpStatus.UNAUTHORIZED, message: 'Unverified user' });
 		});
 	});
 

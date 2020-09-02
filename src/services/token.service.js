@@ -98,10 +98,23 @@ const generateResetPasswordToken = async (email) => {
 	return resetPasswordToken;
 };
 
+/**
+ * Generate account verification token
+ * @param {User} user
+ * @returns {Promise<string>}
+ */
+const generateVerificationToken = async (user) => {
+	const expires = moment().add(config.jwt.verificationExpirationDays, 'days');
+	const verificationToken = generateToken(user.id, expires);
+	await saveToken(verificationToken, user.id, expires, 'accountVerification');
+	return verificationToken;
+};
+
 module.exports = {
 	generateToken,
 	saveToken,
 	verifyToken,
 	generateAuthTokens,
 	generateResetPasswordToken,
+	generateVerificationToken,
 };

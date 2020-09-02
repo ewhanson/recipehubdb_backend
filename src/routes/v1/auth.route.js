@@ -6,6 +6,7 @@ const authController = require('../../controllers/auth.controller');
 const router = express.Router();
 
 router.post('/register', validate(authValidation.register), authController.register);
+router.post('/verify-account', validate(authValidation.verifyAccount), authController.verifyAccount);
 router.post('/login', validate(authValidation.login), authController.login);
 router.post('/logout', validate(authValidation.logout), authController.logout);
 router.post('/refresh-tokens', validate(authValidation.refreshTokens), authController.refreshTokens);
@@ -64,10 +65,36 @@ module.exports = router;
  *                properties:
  *                  user:
  *                    $ref: '#/components/schemas/User'
- *                  tokens:
- *                    $ref: '#/components/schemas/AuthTokens'
  *        "400":
  *          $ref: '#/components/responses/DuplicateEmail'
+ */
+
+/**
+ * @swagger
+ * path:
+ *  /auth/verify-account:
+ *    post:
+ *      summary: Verify account
+ *      tags: [Auth]
+ *      parameters:
+ *        - in: query
+ *          name: token
+ *          required: true
+ *          schema:
+ *            type: string
+ *          description: User account verification token
+ *      responses:
+ *        "204":
+ *          description: No content
+ *        "401":
+ *          description: User verification failed
+ *          content:
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/Error'
+ *              example:
+ *                code: 401
+ *                message: User verification failed
  */
 
 /**
