@@ -14,7 +14,9 @@ env:
     - JWT_SECRET=thisisasamplesecret
     - JWT_ACCESS_EXPIRATION_MINUTES=30
     - JWT_REFRESH_EXPIRATION_DAYS=30
+    - JWT_VERIFICATION_EXPIRATION_DAYS=30
 script:
   - yarn lint
   - yarn test
-after_success: yarn coverage:coveralls
+# coveralls not available for private repo
+# after_success: yarn coverage:coveralls
