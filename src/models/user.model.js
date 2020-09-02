@@ -6,10 +6,18 @@ const { roles } = require('../config/roles');
 
 const userSchema = mongoose.Schema(
 	{
-		name: {
+		username: {
 			type: String,
 			required: true,
+			unique: true,
 			trim: true,
+			validate(value) {
+				if (!value.match(/^(?=[a-zA-Z0-9_.]+$)(?!.*[_.]{2})[^_.].*[^_.]$/)) {
+					throw new Error(
+						'Username can only contain letters, numbers, _, and . characters, .., __ disallowed, first and last character must be letter or number.'
+					);
+				}
+			},
 		},
 		email: {
 			type: String,
@@ -62,6 +70,17 @@ userSchema.plugin(paginate);
  */
 userSchema.statics.isEmailTaken = async function (email, excludeUserId) {
 	const user = await this.findOne({ email, _id: { $ne: excludeUserId } });
+	return !!user;
+};
+
+/**
+ * Check if username is taken
+ * @param {string} username - The user's username
+ * @param {ObjectId} [excludeUserId] - The id of the user to be excluded
+ * @returns {Promise<boolean>}
+ */
+userSchema.statics.isUsernameTaken = async function (username, excludeUserId) {
+	const user = await this.findOne({ username, _id: { $ne: excludeUserId } });
 	return !!user;
 };
 

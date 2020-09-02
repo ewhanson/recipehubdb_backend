@@ -15,7 +15,17 @@ const password = (value, helpers) => {
 	return value;
 };
 
+const username = (value, helpers) => {
+	if (!value.match(/^(?=[a-zA-Z0-9_.]+$)(?!.*[_.]{2})[^_.].*[^_.]$/)) {
+		return helpers.message(
+			'username can only contain, letters, numbers, _, and ., no __ or .., and must start and end with letter or number'
+		);
+	}
+	return value;
+};
+
 module.exports = {
 	objectId,
 	password,
+	username,
 };

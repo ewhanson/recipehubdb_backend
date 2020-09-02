@@ -22,7 +22,7 @@ describe('Auth routes', () => {
 		let newUser;
 		beforeEach(() => {
 			newUser = {
-				name: faker.name.findName(),
+				username: faker.internet.userName(),
 				email: faker.internet.email().toLowerCase(),
 				password: 'password1',
 			};
@@ -35,7 +35,7 @@ describe('Auth routes', () => {
 			expect(res.body.user).not.toHaveProperty('password');
 			expect(res.body.user).toEqual({
 				id: expect.anything(),
-				name: newUser.name,
+				username: newUser.username,
 				email: newUser.email,
 				role: 'user',
 				verified: false,
@@ -44,7 +44,7 @@ describe('Auth routes', () => {
 			const dbUser = await User.findById(res.body.user.id);
 			expect(dbUser).toBeDefined();
 			expect(dbUser.password).not.toBe(newUser.password);
-			expect(dbUser).toMatchObject({ name: newUser.name, email: newUser.email, role: 'user' });
+			expect(dbUser).toMatchObject({ username: newUser.username, email: newUser.email, role: 'user' });
 		});
 
 		test('should return 201 and email user verification token', async () => {
@@ -67,6 +67,19 @@ describe('Auth routes', () => {
 		test('should return 400 error if email is already used', async () => {
 			await insertUsers([userOne]);
 			newUser.email = userOne.email;
+
+			await request(app).post('/v1/auth/register').send(newUser).expect(httpStatus.BAD_REQUEST);
+		});
+
+		test('should return 400 error if username is already in use', async () => {
+			await insertUsers([userOne]);
+			newUser.username = userOne.username;
+
+			await request(app).post('/v1/auth/register').send(newUser).expect(httpStatus.BAD_REQUEST);
+		});
+
+		test('should return 400 error if username contains invalid characters', async () => {
+			newUser.username = '$username';
 
 			await request(app).post('/v1/auth/register').send(newUser).expect(httpStatus.BAD_REQUEST);
 		});
@@ -149,7 +162,7 @@ describe('Auth routes', () => {
 
 			expect(res.body.user).toEqual({
 				id: expect.anything(),
-				name: userOne.name,
+				username: userOne.username,
 				email: userOne.email,
 				role: userOne.role,
 				verified: true,

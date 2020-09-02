@@ -43,12 +43,12 @@ module.exports = router;
  *            schema:
  *              type: object
  *              required:
- *                - name
+ *                - username
  *                - email
  *                - password
  *                - role
  *              properties:
- *                name:
+ *                username:
  *                  type: string
  *                email:
  *                  type: string
@@ -63,7 +63,7 @@ module.exports = router;
  *                   type: string
  *                   enum: [user, admin]
  *              example:
- *                name: fake name
+ *                username: fakeuser
  *                email: fake@example.com
  *                password: password1
  *                role: user
@@ -89,10 +89,10 @@ module.exports = router;
  *        - bearerAuth: []
  *      parameters:
  *        - in: query
- *          name: name
+ *          name: username
  *          schema:
  *            type: string
- *          description: User name
+ *          description: Username
  *        - in: query
  *          name: role
  *          schema:
@@ -198,7 +198,7 @@ module.exports = router;
  *            schema:
  *              type: object
  *              properties:
- *                name:
+ *                username:
  *                  type: string
  *                email:
  *                  type: string
@@ -210,7 +210,7 @@ module.exports = router;
  *                  minLength: 8
  *                  description: At least one number and one letter
  *              example:
- *                name: fake name
+ *                username: fakename
  *                email: fake@example.com
  *                password: password1
  *      responses:

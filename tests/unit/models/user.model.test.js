@@ -6,7 +6,7 @@ describe('User model', () => {
 		let newUser;
 		beforeEach(() => {
 			newUser = {
-				name: faker.name.findName(),
+				username: faker.internet.userName(),
 				email: faker.internet.email().toLowerCase(),
 				password: 'password1',
 				role: 'user',
@@ -20,6 +20,31 @@ describe('User model', () => {
 
 		test('should throw a validation error if email is invalid', async () => {
 			newUser.email = 'invalidEmail';
+			await expect(new User(newUser).validate()).rejects.toThrow();
+		});
+
+		test('should throw a validation error if username contains invalid characters', async () => {
+			newUser.username = '$username';
+			await expect(new User(newUser).validate()).rejects.toThrow();
+		});
+
+		test('should throw a validation error if username begins with _', async () => {
+			newUser.username = '_username';
+			await expect(new User(newUser).validate()).rejects.toThrow();
+		});
+
+		test('should throw a validation error if username ends with _', async () => {
+			newUser.username = 'username_';
+			await expect(new User(newUser).validate()).rejects.toThrow();
+		});
+
+		test('should throw a validation error if username contains __', async () => {
+			newUser.username = 'user__name';
+			await expect(new User(newUser).validate()).rejects.toThrow();
+		});
+
+		test('should throw a validation error if username contains whitespace', async () => {
+			newUser.username = 'user name';
 			await expect(new User(newUser).validate()).rejects.toThrow();
 		});
 
@@ -47,7 +72,7 @@ describe('User model', () => {
 	describe('User toJSON()', () => {
 		test('should not return user password when toJSON is called', () => {
 			const newUser = {
-				name: faker.name.findName(),
+				username: faker.internet.userName(),
 				email: faker.internet.email().toLowerCase(),
 				password: 'password1',
 				role: 'user',
