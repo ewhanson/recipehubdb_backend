@@ -4,6 +4,7 @@ const httpStatus = require('http-status');
 const app = require('../../src/app');
 const setupTestDB = require('../utils/setupTestDB');
 const { User } = require('../../src/models');
+const { roles } = require('../../src/config/roles');
 const { userOne, userTwo, admin, insertUsers } = require('../fixtures/user.fixture');
 const { userOneAccessToken, adminAccessToken } = require('../fixtures/token.fixture');
 
@@ -18,7 +19,7 @@ describe('User routes', () => {
 				username: faker.internet.userName(),
 				email: faker.internet.email().toLowerCase(),
 				password: 'password1',
-				role: 'user',
+				role: roles.USER,
 			};
 		});
 
@@ -232,7 +233,7 @@ describe('User routes', () => {
 			const res = await request(app)
 				.get('/v1/users')
 				.set('Authorization', `Bearer ${adminAccessToken}`)
-				.query({ role: 'user' })
+				.query({ role: roles.USER })
 				.send()
 				.expect(httpStatus.OK);
 
@@ -520,14 +521,14 @@ describe('User routes', () => {
 				id: userOne._id.toHexString(),
 				username: updateBody.username,
 				email: updateBody.email,
-				role: 'user',
+				role: roles.USER,
 				verified: true,
 			});
 
 			const dbUser = await User.findById(userOne._id);
 			expect(dbUser).toBeDefined();
 			expect(dbUser.password).not.toBe(updateBody.password);
-			expect(dbUser).toMatchObject({ username: updateBody.username, email: updateBody.email, role: 'user' });
+			expect(dbUser).toMatchObject({ username: updateBody.username, email: updateBody.email, role: roles.USER });
 		});
 
 		test('should return 401 error if access token is missing', async () => {

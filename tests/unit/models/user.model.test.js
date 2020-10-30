@@ -1,4 +1,5 @@
 const faker = require('faker');
+const { roles } = require('../../../src/config/roles');
 const { User } = require('../../../src/models');
 
 describe('User model', () => {
@@ -9,7 +10,7 @@ describe('User model', () => {
 				username: faker.internet.userName(),
 				email: faker.internet.email().toLowerCase(),
 				password: 'password1',
-				role: 'user',
+				role: roles.USER,
 				verified: true,
 			};
 		});
@@ -75,7 +76,7 @@ describe('User model', () => {
 				username: faker.internet.userName(),
 				email: faker.internet.email().toLowerCase(),
 				password: 'password1',
-				role: 'user',
+				role: roles.USER,
 			};
 			expect(new User(newUser).toJSON()).not.toHaveProperty('password');
 		});

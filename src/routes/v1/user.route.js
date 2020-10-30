@@ -1,4 +1,5 @@
 const express = require('express');
+const { rights } = require('../../config/roles');
 const auth = require('../../middlewares/auth');
 const validate = require('../../middlewares/validate');
 const userValidation = require('../../validations/user.validation');
@@ -8,14 +9,16 @@ const router = express.Router();
 
 router
 	.route('/')
-	.post(auth('manageUsers'), validate(userValidation.createUser), userController.createUser)
-	.get(auth('getUsers'), validate(userValidation.getUsers), userController.getUsers);
+	.post(auth(rights.MANAGE_USERS), validate(userValidation.createUser), userController.createUser)
+	.get(auth(rights.GET_USERS), validate(userValidation.getUsers), userController.getUsers);
 
 router
 	.route('/:userId')
-	.get(auth('getUsers'), validate(userValidation.getUser), userController.getUser)
-	.patch(auth('manageUsers'), validate(userValidation.updateUser), userController.updateUser)
-	.delete(auth('manageUsers'), validate(userValidation.deleteUser), userController.deleteUser);
+	.get(auth(rights.GET_USERS), validate(userValidation.getUser), userController.getUser)
+	.patch(auth(rights.MANAGE_USERS), validate(userValidation.updateUser), userController.updateUser)
+	.delete(auth(rights.MANAGE_USERS), validate(userValidation.deleteUser), userController.deleteUser);
+
+router.route('/:userId/:testId').get(auth(rights.GET_USERS), (req, res) => res.status(200).send({ message: 'Test' }));
 
 module.exports = router;
 

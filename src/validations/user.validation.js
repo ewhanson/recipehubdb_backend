@@ -1,12 +1,13 @@
 const Joi = require('joi');
 const { password, objectId, username } = require('./custom.validation');
+const { roles } = require('../config/roles');
 
 const createUser = {
 	body: Joi.object().keys({
 		email: Joi.string().required().email(),
 		password: Joi.string().required().custom(password),
 		username: Joi.string().required().custom(username),
-		role: Joi.string().required().valid('user', 'admin'),
+		role: Joi.string().required().valid(roles.USER, roles.ADMIN),
 	}),
 };
 

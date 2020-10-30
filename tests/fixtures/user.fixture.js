@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const faker = require('faker');
+const { roles } = require('../../src/config/roles');
 const User = require('../../src/models/user.model');
 
 const password = 'password1';
@@ -12,7 +13,7 @@ const userOne = {
 	username: faker.internet.userName(),
 	email: faker.internet.email().toLowerCase(),
 	password,
-	role: 'user',
+	role: roles.USER,
 	verified: true,
 };
 
@@ -21,7 +22,7 @@ const userTwo = {
 	username: faker.internet.userName(),
 	email: faker.internet.email().toLowerCase(),
 	password,
-	role: 'user',
+	role: roles.USER,
 	verified: true,
 };
 
@@ -30,7 +31,7 @@ const admin = {
 	username: faker.internet.userName(),
 	email: faker.internet.email().toLowerCase(),
 	password,
-	role: 'admin',
+	role: roles.ADMIN,
 	verified: true,
 };
 

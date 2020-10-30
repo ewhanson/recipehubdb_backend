@@ -11,7 +11,7 @@ const { tokenService, emailService } = require('../../src/services');
 const ApiError = require('../../src/utils/ApiError');
 const setupTestDB = require('../utils/setupTestDB');
 const { User, Token } = require('../../src/models');
-const { roleRights } = require('../../src/config/roles');
+const { roles, roleRights } = require('../../src/config/roles');
 const { tokenTypes } = require('../../src/config/tokens');
 const { userOne, admin, insertUsers } = require('../fixtures/user.fixture');
 const { userOneAccessToken, adminAccessToken } = require('../fixtures/token.fixture');
@@ -38,14 +38,14 @@ describe('Auth routes', () => {
 				id: expect.anything(),
 				username: newUser.username,
 				email: newUser.email,
-				role: 'user',
+				role: roles.USER,
 				verified: false,
 			});
 
 			const dbUser = await User.findById(res.body.user.id);
 			expect(dbUser).toBeDefined();
 			expect(dbUser.password).not.toBe(newUser.password);
-			expect(dbUser).toMatchObject({ username: newUser.username, email: newUser.email, role: 'user' });
+			expect(dbUser).toMatchObject({ username: newUser.username, email: newUser.email, role: roles.USER });
 		});
 
 		test('should return 201 and email user verification token', async () => {
