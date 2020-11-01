@@ -13,11 +13,31 @@ const rights = {
 	MANAGE_USERS: (user, params) => {
 		return true;
 	},
+	// eslint-disable-next-line no-unused-vars
+	GET_RECIPES: (user, params) => {
+		return true;
+	},
+	// eslint-disable-next-line no-unused-vars
+	MANAGE_OWN_RECIPES: (user, params) => {
+		// TODO: Add in test logic
+		return true;
+	},
+	// eslint-disable-next-line no-unused-vars
+	MANAGE_ANY_RECIPE: (user, params) => {
+		// TODO: Add in test logic
+		return true;
+	},
 };
 
 const roleRights = new Map();
-roleRights.set(roles.USER, []);
-roleRights.set(roles.ADMIN, [rights.GET_USERS, rights.MANAGE_USERS]);
+roleRights.set(roles.USER, [rights.GET_USERS, rights.GET_RECIPES, rights.MANAGE_OWN_RECIPES]);
+roleRights.set(roles.ADMIN, [
+	rights.GET_USERS,
+	rights.MANAGE_USERS,
+	rights.GET_RECIPES,
+	rights.MANAGE_OWN_RECIPES,
+	rights.MANAGE_ANY_RECIPE,
+]);
 
 module.exports = {
 	roles,
