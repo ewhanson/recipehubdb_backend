@@ -11,17 +11,15 @@ const { roleRights } = require('../config/roles');
  * @returns {boolean}
  */
 const checkRoleRights = (user, params, requiredRights) => {
-	if (requiredRights.length) {
-		const userRights = roleRights.get(user.role);
-		let results = false;
+	const userRights = roleRights.get(user.role);
+	let results = false;
 
-		requiredRights.every((requiredRight) => {
-			results = !(!userRights.includes(requiredRight) || !requiredRight(user, params));
-			return results;
-		});
-
+	requiredRights.every((requiredRight) => {
+		results = !(!userRights.includes(requiredRight) || !requiredRight(user, params));
 		return results;
-	}
+	});
+
+	return results;
 };
 
 const verifyCallback = (req, resolve, reject, requiredRights) => async (err, user, info) => {
