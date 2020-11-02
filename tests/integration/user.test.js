@@ -196,14 +196,10 @@ describe('User routes', () => {
 			await request(app).get('/v1/users').send().expect(httpStatus.UNAUTHORIZED);
 		});
 
-		test('should return 403 if a non-admin is trying to access all users', async () => {
+		test('should return 200 if a non-admin is trying to access all users', async () => {
 			await insertUsers([userOne, userTwo, admin]);
 
-			await request(app)
-				.get('/v1/users')
-				.set('Authorization', `Bearer ${userOneAccessToken}`)
-				.send()
-				.expect(httpStatus.FORBIDDEN);
+			await request(app).get('/v1/users').set('Authorization', `Bearer ${userOneAccessToken}`).send().expect(httpStatus.OK);
 		});
 
 		test('should correctly apply filter on username field', async () => {
@@ -399,14 +395,14 @@ describe('User routes', () => {
 			await request(app).get(`/v1/users/${userOne._id}`).send().expect(httpStatus.UNAUTHORIZED);
 		});
 
-		test('should return 403 error if user is trying to get another user', async () => {
+		test('should return 200 OK if user is trying to get another user', async () => {
 			await insertUsers([userOne, userTwo]);
 
 			await request(app)
 				.get(`/v1/users/${userTwo._id}`)
 				.set('Authorization', `Bearer ${userOneAccessToken}`)
 				.send()
-				.expect(httpStatus.FORBIDDEN);
+				.expect(httpStatus.OK);
 		});
 
 		test('should return 200 and the user object if admin is trying to get another user', async () => {
