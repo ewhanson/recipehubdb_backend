@@ -11,9 +11,60 @@ const recipeSchema = mongoose.Schema(
 			type: String,
 			required: true,
 		},
+		prepTime: {
+			type: Number,
+		},
+		cookTime: {
+			type: Number,
+		},
+		yield: {
+			amount: { type: Number },
+			unit: { type: String },
+		},
+		ingredients: [
+			{
+				_id: false,
+				title: { type: String },
+				// order: { type: Number },
+				items: [
+					{
+						_id: false,
+						amount: { type: Number },
+						unit: { type: String },
+						ingredient: { type: String },
+						note: { type: String },
+						// order: { type: Number },
+					},
+				],
+			},
+		],
+		instructions: [
+			{
+				_id: false,
+				title: { type: String },
+				// order: { type: Number },
+				items: [
+					{
+						_id: false,
+						text: { type: String },
+						// order: { type: Number },
+					},
+				],
+			},
+		],
+		tags: [{ type: String }],
+		// categories, TODO: add categories at a future date
+		source: { type: String },
+		notes: { type: String },
+		// TODO: Comments at a future date
 		creator: {
-			type: mongoose.Schema.ObjectId,
+			type: mongoose.ObjectId,
 			ref: 'User',
+			required: true,
+		},
+		copiedFrom: {
+			type: mongoose.ObjectId,
+			ref: 'Recipe',
 		},
 	},
 	{

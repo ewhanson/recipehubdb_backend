@@ -10,7 +10,7 @@ const tokenSchema = mongoose.Schema(
 			index: true,
 		},
 		user: {
-			type: mongoose.SchemaTypes.ObjectId,
+			type: mongoose.ObjectId,
 			ref: 'User',
 			required: true,
 		},
