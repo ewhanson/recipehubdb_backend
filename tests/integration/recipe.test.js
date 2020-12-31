@@ -141,4 +141,77 @@ describe('Recipe routes', () => {
 			expect(res.body.results[0].id).toBe(recipeAdminData.recipe._id.toHexString());
 		});
 	});
+
+	describe('GET /v1/recipes/:recipeId', () => {
+		test('should return 200 and the user object if data is ok', async () => {
+			await insertRecipes([recipeOneData]);
+
+			const res = await request(app)
+				.get(`/v1/recipes/${recipeOneData.recipe._id}`)
+				.set('Authorization', `Bearer ${userOneAccessToken}`)
+				.send()
+				.expect(httpStatus.OK);
+
+			expect(res.body).toEqual({
+				id: recipeOneData.recipe._id.toHexString(),
+				creator: recipeOneData.user._id.toHexString(),
+				title: recipeOneData.recipe.title,
+				description: recipeOneData.recipe.description,
+				prepTime: recipeOneData.recipe.prepTime,
+				cookTime: recipeOneData.recipe.cookTime,
+				yield: recipeOneData.recipe.yield,
+				ingredients: recipeOneData.recipe.ingredients,
+				instructions: recipeOneData.recipe.instructions,
+				tags: recipeOneData.recipe.tags,
+				source: recipeOneData.recipe.source,
+				notes: recipeOneData.recipe.notes,
+			});
+		});
+
+		test('should return 401 if access token is missing', async () => {
+			await insertRecipes([recipeOneData]);
+
+			await request(app).get(`/v1/recipes/${recipeOneData.recipe._id}`).send().expect(httpStatus.UNAUTHORIZED);
+		});
+
+		test("should return 200 OK if user is trying to access another user's recipe", async () => {
+			await insertRecipes([recipeOneData, recipeTwoData]);
+
+			await request(app)
+				.get(`/v1/recipes/${recipeTwoData.recipe._id}`)
+				.set('Authorization', `Bearer ${userOneAccessToken}`)
+				.send()
+				.expect(httpStatus.OK);
+		});
+
+		test("should return 200 OK and recipe if admin is trying to access another user's recipe", async () => {
+			await insertRecipes([recipeOneData, recipeAdminData]);
+
+			await request(app)
+				.get(`/v1/recipes/${recipeOneData.recipe._id}`)
+				.set('Authorization', `Bearer ${adminAccessToken}`)
+				.send()
+				.expect(httpStatus.OK);
+		});
+
+		test('should return 400 error if recipeId is not a valid mongo id', async () => {
+			await insertRecipes([recipeOneData]);
+
+			await request(app)
+				.get('/v1/recipes/invalidId')
+				.set('Authorization', `Bearer ${userOneAccessToken}`)
+				.send()
+				.expect(httpStatus.BAD_REQUEST);
+		});
+
+		test('should return 404 error if recipe is not found', async () => {
+			await insertRecipes([recipeOneData]);
+
+			await request(app)
+				.get(`v1/recipes/${recipeTwoData.recipe._id}`)
+				.set('Authorization', `Bearer ${userOneAccessToken}`)
+				.send()
+				.expect(httpStatus.NOT_FOUND);
+		});
+	});
 });

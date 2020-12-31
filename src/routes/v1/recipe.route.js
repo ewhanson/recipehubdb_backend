@@ -10,10 +10,10 @@ router
 	.route('/')
 	.post(auth(), validate(recipeValidation.createRecipe), recipeController.createRecipe)
 	.get(auth(), validate(recipeValidation.getRecipes), recipeController.getRecipes);
-// TODO: GET /recipes/:recipeID
 // TODO: PATCH /recipes/:recipeID
 // TODO: DELETE /recipes/:recipeID
 // router.route('/:recipeId').get().patch().post();
+router.route('/:recipeId').get(auth(), validate(recipeValidation.getRecipe), recipeController.getRecipe);
 
 module.exports = router;
 

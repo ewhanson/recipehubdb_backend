@@ -1,4 +1,5 @@
 const Joi = require('joi');
+const { objectId } = require('./custom.validation');
 
 const createRecipe = {
 	body: Joi.object().keys({
@@ -48,7 +49,11 @@ const getRecipes = {
 	}),
 };
 
-const getRecipe = {};
+const getRecipe = {
+	params: Joi.object().keys({
+		recipeId: Joi.string().custom(objectId),
+	}),
+};
 
 const updateRecipe = {};
 

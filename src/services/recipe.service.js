@@ -27,7 +27,17 @@ const queryRecipes = async (filter, options) => {
 	return recipes;
 };
 
+/**
+ * Get recipe by id
+ * @param {ObjectId} id
+ * @returns {Promise<Recipe>}
+ */
+const getRecipeById = async (id) => {
+	return Recipe.findById(id);
+};
+
 module.exports = {
 	createRecipe,
 	queryRecipes,
+	getRecipeById,
 };
