@@ -92,6 +92,11 @@ const recipeAdminData = {
 	user: admin,
 };
 
+/**
+ *
+ * @param recipesData {Array}
+ * @returns {Promise<void>}
+ */
 const insertRecipes = async (recipesData) => {
 	const users = [];
 	const recipes = [];

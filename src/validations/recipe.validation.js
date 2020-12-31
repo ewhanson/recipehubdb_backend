@@ -39,7 +39,14 @@ const createRecipe = {
 	}),
 };
 
-const getRecipes = {};
+const getRecipes = {
+	query: Joi.object().keys({
+		// TODO: Recipe filtering query parameters
+		sortBy: Joi.string(),
+		limit: Joi.number().integer(),
+		page: Joi.number().integer(),
+	}),
+};
 
 const getRecipe = {};
 
