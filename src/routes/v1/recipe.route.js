@@ -7,6 +7,8 @@ const recipeController = require('../../controllers/recipe.controller');
 
 const router = express.Router();
 
+router.param('recipeId', recipeController.preloadRecipe);
+
 router
 	.route('/')
 	.post(auth(), validate(recipeValidation.createRecipe), recipeController.createRecipe)

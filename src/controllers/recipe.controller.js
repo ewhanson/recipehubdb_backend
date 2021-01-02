@@ -18,7 +18,14 @@ const getRecipes = catchAsync(async (req, res) => {
 });
 
 const getRecipe = catchAsync(async (req, res) => {
-	const recipe = await recipeService.getRecipeById(req.params.recipeId);
+	let recipe;
+
+	if (!req.recipe) {
+		recipe = await recipeService.getRecipeById(req.params.recipeId);
+	} else {
+		recipe = req.recipe;
+	}
+
 	if (!recipe) {
 		throw new ApiError(httpStatus.NOT_FOUND, 'Recipe not found');
 	}
@@ -35,10 +42,24 @@ const deleteRecipe = catchAsync(async (req, res) => {
 	res.status(httpStatus.NO_CONTENT).send();
 });
 
+const preloadRecipe = async (req, res, next, recipeId) => {
+	try {
+		const recipe = await recipeService.getRecipeById(recipeId);
+		if (!recipe) {
+			throw new ApiError(httpStatus.NOT_FOUND, 'Recipe not found');
+		}
+		req.recipe = recipe;
+		next();
+	} catch (err) {
+		next(err);
+	}
+};
+
 module.exports = {
 	createRecipe,
 	getRecipes,
 	getRecipe,
 	updateRecipe,
 	deleteRecipe,
+	preloadRecipe,
 };
