@@ -25,8 +25,20 @@ const getRecipe = catchAsync(async (req, res) => {
 	res.send(recipe);
 });
 
+const updateRecipe = catchAsync(async (req, res) => {
+	const recipe = await recipeService.updateRecipeById(req.params.recipeId, req.body);
+	res.send(recipe);
+});
+
+const deleteRecipe = catchAsync(async (req, res) => {
+	await recipeService.deleteRecipeById(req.params.recipeId);
+	res.status(httpStatus.NO_CONTENT).send();
+});
+
 module.exports = {
 	createRecipe,
 	getRecipes,
 	getRecipe,
+	updateRecipe,
+	deleteRecipe,
 };

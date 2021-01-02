@@ -14,6 +14,8 @@ const checkRoleRights = (user, params, requiredRights) => {
 	const userRights = roleRights.get(user.role);
 	let results = false;
 
+	// TODO: Does not work unless all are true
+	// Fails if any are false immediately
 	requiredRights.every((requiredRight) => {
 		results = !(!userRights.includes(requiredRight) || !requiredRight(user, params));
 		return results;

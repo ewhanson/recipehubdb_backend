@@ -1,5 +1,6 @@
 const request = require('supertest');
 const httpStatus = require('http-status');
+const faker = require('faker');
 const app = require('../../src/app');
 const setupTestDB = require('../utils/setupTestDB');
 // const { roles } = require('../../src/config/roles');
@@ -210,6 +211,155 @@ describe('Recipe routes', () => {
 			await request(app)
 				.get(`v1/recipes/${recipeTwoData.recipe._id}`)
 				.set('Authorization', `Bearer ${userOneAccessToken}`)
+				.send()
+				.expect(httpStatus.NOT_FOUND);
+		});
+	});
+
+	describe('PATCH /v1/recipes/:recipeId', () => {
+		test('should return 200 and successfully update recipe if data is ok', async () => {
+			await insertRecipes([recipeOneData]);
+			const updateBody = {
+				...new RecipeData().data,
+			};
+
+			const res = await request(app)
+				.patch(`/v1/recipes/${recipeOneData.recipe._id}`)
+				.set('Authorization', `Bearer ${userOneAccessToken}`)
+				.send(updateBody)
+				.expect(httpStatus.OK);
+
+			expect(res.body).toEqual({
+				...updateBody,
+				creator: recipeOneData.recipe.creator.toHexString(),
+				id: recipeOneData.recipe._id.toHexString(),
+			});
+
+			const dbRecipe = await Recipe.findById(recipeOneData.recipe._id);
+			expect(dbRecipe).toBeDefined();
+			expect(dbRecipe.toJSON()).toMatchObject({
+				...updateBody,
+				creator: recipeOneData.recipe.creator,
+				id: recipeOneData.recipe._id.toHexString(),
+			});
+		});
+
+		test('should return 401 error if access token is missing', async () => {
+			await insertRecipes([recipeOneData]);
+			const updateBody = { title: faker.commerce.productName() };
+
+			await request(app).patch(`/v1/recipes/${recipeOneData.recipe._id}`).send(updateBody).expect(httpStatus.UNAUTHORIZED);
+		});
+
+		test("should return 403 if user is updating another user's recipe", async () => {
+			insertRecipes([recipeOneData, recipeTwoData]);
+
+			const updateBody = { title: faker.commerce.productName() };
+
+			await request(app)
+				.patch(`/v1/recipes/${recipeTwoData.recipe._id}`)
+				.set('Authorization', `Bearer ${userOneAccessToken}`)
+				.send(updateBody)
+				.expect(httpStatus.FORBIDDEN);
+		});
+
+		test("should return 200 and successfully update recipe if admin is updating another user's recipe", async () => {
+			await insertUsers([admin]);
+			await insertRecipes([recipeOneData]);
+
+			const updateBody = { title: faker.commerce.productName() };
+
+			await request(app)
+				.patch(`/v1/recipes/${recipeOneData.recipe._id}`)
+				.set('Authorization', `Bearer ${adminAccessToken}`)
+				.send(updateBody)
+				.expect(httpStatus.OK);
+		});
+
+		test("should return 404 if admin is updaing another user's recipe that is not found", async () => {
+			await insertUsers([admin]);
+
+			const updateBody = { title: faker.commerce.productName() };
+
+			await request(app)
+				.patch(`/v1/recipes/${recipeOneData.recipe._id}`)
+				.set('Authorization', `Bearer ${adminAccessToken}`)
+				.send(updateBody)
+				.expect(httpStatus.NOT_FOUND);
+		});
+
+		test('should return 400 error if recipeId is not a valid mongo id', async () => {
+			await insertUsers([admin]);
+			const updateBody = { title: faker.commerce.productName() };
+
+			await request(app)
+				.patch('/v1/recipes/invalidId')
+				.set('Authorization', `Bearer ${adminAccessToken}`)
+				.send(updateBody)
+				.expect(httpStatus.BAD_REQUEST);
+		});
+
+		// TODO: should return XXX (400?) if attempting to change creator
+	});
+
+	describe('DELETE /v1/recipes/:recipeId', () => {
+		test('should return 204 if data is ok', async () => {
+			await insertRecipes([recipeOneData]);
+
+			await request(app)
+				.delete(`/v1/recipes/${recipeOneData.recipe._id}`)
+				.set('Authorization', `Bearer ${userOneAccessToken}`)
+				.send()
+				.expect(httpStatus.NO_CONTENT);
+
+			const dbRecipe = await Recipe.findById(recipeOneData.recipe._id);
+			expect(dbRecipe).toBeNull();
+		});
+
+		test('should return 401 error if access token is missing', async () => {
+			await insertRecipes([recipeOneData]);
+
+			await request(app).delete(`/v1/recipes/${recipeOneData.recipe._id}`).send().expect(httpStatus.UNAUTHORIZED);
+		});
+
+		test("should return 403 error if user is trying to delete another user's recipe", async () => {
+			await insertUsers([userOne]);
+			await insertRecipes([recipeTwoData]);
+
+			await request(app)
+				.delete(`/v1/recipes/${recipeTwoData.recipe._id}`)
+				.set('Authorization', `Bearer ${userOneAccessToken}`)
+				.send()
+				.expect(httpStatus.FORBIDDEN);
+		});
+
+		test("should return 204 if admin is trying to delete another user's recipe", async () => {
+			await insertUsers([admin]);
+			await insertRecipes([recipeOneData]);
+
+			await request(app)
+				.delete(`/v1/recipes/${recipeOneData.recipe._id}`)
+				.set('Authorization', `Bearer ${adminAccessToken}`)
+				.send()
+				.expect(httpStatus.NO_CONTENT);
+		});
+
+		test('should return 400 error if recipeId is not a valid mongo id', async () => {
+			await insertRecipes([recipeOneData]);
+
+			await request(app)
+				.delete('/v1/recipes/invalidId')
+				.set('Authorization', `Bearer ${userOneAccessToken}`)
+				.send()
+				.expect(httpStatus.BAD_REQUEST);
+		});
+
+		test('should return 404 error if recipe already is not found', async () => {
+			await insertUsers([admin]);
+
+			await request(app)
+				.delete(`/v1/recipes/${recipeOneData.recipe._id}`)
+				.set('Authorization', `Bearer ${adminAccessToken}`)
 				.send()
 				.expect(httpStatus.NOT_FOUND);
 		});

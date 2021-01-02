@@ -1,3 +1,5 @@
+// const { Recipe } = require('../models');
+
 // const roles = ['user', 'admin'];
 const roles = {
 	USER: 'user',
@@ -20,6 +22,11 @@ const rights = {
 	// eslint-disable-next-line no-unused-vars
 	MANAGE_OWN_RECIPES: (user, params) => {
 		// TODO: Add in test logic
+		// const recipe = await Recipe.findById(params.recipeId);
+		// const result = user.id === recipe.creator.toHexString();
+
+		// return result;
+
 		return true;
 	},
 	// eslint-disable-next-line no-unused-vars
