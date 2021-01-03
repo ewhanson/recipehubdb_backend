@@ -6,22 +6,19 @@ const { roleRights } = require('../config/roles');
 /**
  * Check if a user role has the required rights and passes the associated tests
  * @param user
- * @param params
- * @param requiredRights
+ * @param req
+ * @param {Array} requiredRights
  * @returns {boolean}
  */
-const checkRoleRights = (user, params, requiredRights) => {
+const checkRoleRights = (user, req, requiredRights) => {
 	const userRights = roleRights.get(user.role);
-	let results = false;
 
-	// TODO: Does not work unless all are true
-	// Fails if any are false immediately
-	requiredRights.every((requiredRight) => {
-		results = !(!userRights.includes(requiredRight) || !requiredRight(user, params));
-		return results;
+	return requiredRights.some((requiredRight) => {
+		const includesRequiredRight = userRights.includes(requiredRight);
+		const passesRightsTest = requiredRight(user, req);
+
+		return includesRequiredRight && passesRightsTest;
 	});
-
-	return results;
 };
 
 const verifyCallback = (req, resolve, reject, requiredRights) => async (err, user, info) => {
@@ -33,7 +30,7 @@ const verifyCallback = (req, resolve, reject, requiredRights) => async (err, use
 	// First, check if there are required rights
 	if (requiredRights.length) {
 		// Next, check if user passes required role rights tests
-		const hasRequiredRights = checkRoleRights(user, req.params, requiredRights);
+		const hasRequiredRights = checkRoleRights(user, req, requiredRights);
 		// TODO: Transfer userId check to role right tests
 		if (!hasRequiredRights && req.params.userId !== user.id) {
 			return reject(new ApiError(httpStatus.FORBIDDEN, 'Forbidden'));

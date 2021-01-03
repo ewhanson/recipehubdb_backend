@@ -445,6 +445,11 @@ describe('Auth routes', () => {
 });
 
 describe('Auth middleware', () => {
+	// eslint-disable-next-line no-unused-vars
+	const anyRight = (user, req) => {
+		return true;
+	};
+
 	test('should call next with no errors if access token is valid', async () => {
 		await insertUsers([userOne]);
 		const req = httpMocks.createRequest({ headers: { Authorization: `Bearer ${userOneAccessToken}` } });
@@ -544,7 +549,7 @@ describe('Auth middleware', () => {
 		const req = httpMocks.createRequest({ headers: { Authorization: `Bearer ${userOneAccessToken}` } });
 		const next = jest.fn();
 
-		await auth('anyRight')(req, httpMocks.createResponse(), next);
+		await auth(anyRight)(req, httpMocks.createResponse(), next);
 
 		expect(next).toHaveBeenCalledWith(expect.any(ApiError));
 		expect(next).toHaveBeenCalledWith(expect.objectContaining({ statusCode: httpStatus.FORBIDDEN, message: 'Forbidden' }));
@@ -558,7 +563,7 @@ describe('Auth middleware', () => {
 		});
 		const next = jest.fn();
 
-		await auth('anyRight')(req, httpMocks.createResponse(), next);
+		await auth(anyRight)(req, httpMocks.createResponse(), next);
 
 		expect(next).toHaveBeenCalledWith();
 	});

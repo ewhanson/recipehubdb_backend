@@ -11,6 +11,7 @@ const createRecipe = catchAsync(async (req, res) => {
 
 const getRecipes = catchAsync(async (req, res) => {
 	const filter = {};
+	// TODO: Add filtering
 	// const filter = pick(req.query, ['username', 'role']);
 	const options = pick(req.query, ['sortBy', 'limit', 'page']);
 	const result = await recipeService.queryRecipes(filter, options);
@@ -44,13 +45,14 @@ const deleteRecipe = catchAsync(async (req, res) => {
 
 const preloadRecipe = async (req, res, next, recipeId) => {
 	try {
-		const recipe = await recipeService.getRecipeById(recipeId);
-		if (!recipe) {
-			throw new ApiError(httpStatus.NOT_FOUND, 'Recipe not found');
-		}
-		req.recipe = recipe;
+		req.recipe = await recipeService.getRecipeById(recipeId);
 		next();
 	} catch (err) {
+		if (err.value === 'invalidId') {
+			next(new ApiError(httpStatus.BAD_REQUEST, 'Invalid recipe id'));
+		} else {
+			next(new ApiError(httpStatus.NOT_FOUND, 'Recipe not found'));
+		}
 		next(err);
 	}
 };

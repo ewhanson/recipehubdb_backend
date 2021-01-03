@@ -3,7 +3,7 @@ const auth = require('../../middlewares/auth');
 const validate = require('../../middlewares/validate');
 const recipeValidation = require('../../validations/recipe.validation');
 const recipeController = require('../../controllers/recipe.controller');
-// const { rights } = require('../../config/roles');
+const { rights } = require('../../config/roles');
 
 const router = express.Router();
 
@@ -18,8 +18,16 @@ router
 router
 	.route('/:recipeId')
 	.get(auth(), validate(recipeValidation.getRecipe), recipeController.getRecipe)
-	.patch(auth(), validate(recipeValidation.updateRecipe), recipeController.updateRecipe)
-	.delete(auth(), validate(recipeValidation.deleteRecipe), recipeController.deleteRecipe);
+	.patch(
+		auth(rights.MANAGE_ANY_RECIPE, rights.MANAGE_OWN_RECIPES),
+		validate(recipeValidation.updateRecipe),
+		recipeController.updateRecipe
+	)
+	.delete(
+		auth(rights.MANAGE_ANY_RECIPE, rights.MANAGE_OWN_RECIPES),
+		validate(recipeValidation.deleteRecipe),
+		recipeController.deleteRecipe
+	);
 
 module.exports = router;
 

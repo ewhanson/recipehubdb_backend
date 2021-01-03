@@ -15,8 +15,8 @@ router
 router
 	.route('/:userId')
 	.get(auth(rights.GET_USERS), validate(userValidation.getUser), userController.getUser)
-	.patch(auth(rights.MANAGE_USERS), validate(userValidation.updateUser), userController.updateUser)
-	.delete(auth(rights.MANAGE_USERS), validate(userValidation.deleteUser), userController.deleteUser);
+	.patch(auth(rights.MANAGE_USERS, rights.MANAGE_SELF), validate(userValidation.updateUser), userController.updateUser)
+	.delete(auth(rights.MANAGE_USERS, rights.MANAGE_SELF), validate(userValidation.deleteUser), userController.deleteUser);
 
 router.route('/:userId/:testId').get(auth(rights.GET_USERS), (req, res) => res.status(200).send({ message: 'Test' }));
 
