@@ -33,6 +33,115 @@ components:
         token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1ZWJhYzUzNDk1NGI1NDEzOTgwNmMxMTIiLCJpYXQiOjE1ODkyOTg0ODQsImV4cCI6MTU4OTMwMDI4NH0.m1U63blB0MLej_WfB7yC2FTMnCziif9X8yzwDEfJXAg
         expires: 2020-05-12T16:18:04.793Z
 
+    Recipe:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        prepTime:
+          type: number
+          description: Time in minutes.
+        cookTime:
+          type: number
+          description: Time in minutes.
+        yield:
+          type: object
+          properties:
+            amount:
+              type: number
+            unit:
+              type: string
+        ingredients:
+          type: array
+          items:
+            type: object
+            properties:
+              title:
+                type: string
+              items:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    amount:
+                      type: number
+                    unit:
+                      type: string
+                    ingredient:
+                      type: string
+                    note:
+                      type: string
+        instructions:
+          type: array
+          items:
+            type: object
+            properties:
+              title:
+                type: string
+              items:
+                type: array
+                items:
+                  text:
+                    type: string
+        tags:
+          type: array
+          items:
+            type: string
+        source:
+          type: string
+        notes:
+          type: string
+        creator:
+          type: string
+      example:
+        id: 5ebac534954b54139806c112
+        title: Greatest Recipe Ever
+        description: This is the greatest recipe ever
+        prepTime: 15
+        cookTime: 15
+        yield:
+          amount: 4
+          unit: portions
+        ingredients:
+          - {
+              title: Ingredient Section Name,
+              items: [
+                {
+                  amount: 2,
+                  unit: cloves,
+                  ingredient: garlic,
+                  note: crushed
+                },
+                {
+                  amount: 2,
+                  unit: bunches,
+                  ingredient: parsley
+                }
+              ]
+          }
+        instructions:
+          - {
+              title: Instruction Section Name,
+              items: [
+                {
+                  text: Combine garlic and parsley in food processor.
+                },
+                {
+                  text: Cook for 2 minutes in a pan.
+                }
+              ]
+          }
+        tags:
+          - dinner
+          - testing
+        source: Cookbook source name
+        notes: Here are some notes on the recipe
+        creator: 5ebac534954b54139806c112
+
     AuthTokens:
       type: object
       properties:
