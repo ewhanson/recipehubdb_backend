@@ -209,7 +209,7 @@ describe('Recipe routes', () => {
 			await insertRecipes([recipeOneData]);
 
 			await request(app)
-				.get(`v1/recipes/${recipeTwoData.recipe._id}`)
+				.get(`/v1/recipes/${recipeTwoData.recipe._id}`)
 				.set('Authorization', `Bearer ${userOneAccessToken}`)
 				.send()
 				.expect(httpStatus.NOT_FOUND);
